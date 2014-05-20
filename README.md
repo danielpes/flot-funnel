@@ -6,16 +6,17 @@ Flotcharts plugin for drawing funnel-like charts.
 
 Options structure:
 
+```json
 series: {
 	funnel: {
-		# begin TODO
+		// begin TODO
 		mode: "area" / "height",
 		stem: {
 			show: true/false,
 			height: 0-1 for for the height of the funnel stem (percentage of the funnel's total height),
 			width: 0-1 for the width of the funnel stem (percentage of the funnel's max width)
 		},
-		# end TODO
+		// end TODO
 		
 		show: true/false,		
 		offset: {
@@ -40,3 +41,4 @@ series: {
 		}
 	}
 }
+```
