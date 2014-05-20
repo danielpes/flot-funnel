@@ -6,7 +6,7 @@ Flotcharts plugin for drawing funnel-like charts.
 
 Options structure:
 
-```json
+```
 series: {
 	funnel: {
 		// begin TODO
