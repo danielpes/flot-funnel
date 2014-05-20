@@ -9,7 +9,7 @@ Options structure:
 series: {
 	funnel: {
 		# begin TODO
-		mode: "area" / "height"
+		mode: "area" / "height",
 		stem: {
 			show: true/false,
 			height: 0-1 for for the height of the funnel stem (percentage of the funnel's total height),
