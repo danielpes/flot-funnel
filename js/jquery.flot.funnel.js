@@ -457,8 +457,10 @@ More detail and specific examples can be found in the included HTML file.
                                 seriesIndex: i
                             };
                         }
-                    } else {
-
+                    } /*else {
+						 
+						TODO: add IE support
+						
                         // excanvas for IE doesn;t support isPointInPath, this is a workaround.
 
                         var p1X = radius * Math.cos(s.startAngle),
@@ -485,7 +487,7 @@ More detail and specific examples can be found in the included HTML file.
                                 seriesIndex: i
                             };
                         }
-                    }
+                    }*/
 
                     ctx.restore();
                 }
@@ -614,7 +616,7 @@ More detail and specific examples can be found in the included HTML file.
                     width: 1
                 },
                 label: {
-                    show: true,
+                    show: false,
 					align: "center",
                     formatter: function(label, slice) {
                         return "<div style='font-size:x-small;text-align:center;padding:2px;color:white;'>" + slice.data[0][1] + "</div>";
@@ -637,7 +639,7 @@ More detail and specific examples can be found in the included HTML file.
         init: init,
         options: options,
         name: "funnel",
-        version: "1.1"
+        version: "0.1"
     });
 
 })(jQuery);
