@@ -76,9 +76,6 @@ More detail and specific examples can be found in the included HTML file.
         var canvas = null,
             target = null,
             options = null,
-            centerLeft = null,
-            centerTop = null,
-            processed = false,
             ctx = null,
             stemW = null;
             stemH = null;
@@ -174,44 +171,49 @@ More detail and specific examples can be found in the included HTML file.
                 return; // if no series were passed
             }
 
-            var legendWidth = target.children().filter(".legend").children().width() || 0;
+            var legendWidth = target.children().filter(".legend").children().width() || 0
+                leftOffset = options.series.funnel.offset.left,
+                topOffset = options.series.funnel.offset.top,      
+                maxHeight = null, 
+                maxWidth = null,
+                slices = plot.getData(),
+                initialY = (topOffset>0) ? topOffset : 0;
+                totalValue = 0,
+                totalH = initialY;
+                
+            stemH = canvasHeight * options.series.funnel.stem.height;
+            stemW = canvasWidth * options.series.funnel.stem.width;
+
+            centerY = canvasHeight / 2 + topOffset;
+            centerX = canvasWidth / 2;
             
-            var slices = plot.getData(),
-                totalValue = 0;
+            ctx = newCtx;
             
             for (var i = 0; i < slices.length; ++i) {
                 totalValue += slices[i].value;
             }
             
-            ctx = newCtx;
-            stemH = canvasHeight * options.series.funnel.stem.height;
-            stemW = canvasWidth * options.series.funnel.stem.width;
-
-
-            centerY = canvasHeight / 2 + options.series.funnel.offset.top;
-            centerX = canvasWidth / 2;
-
-            if (options.series.funnel.offset.left == "auto") {
+            if (leftOffset == "auto") {
                 if (options.legend.position.match("w")) {
-                    centerX += legendWidth / 2;
+                    leftOffset = +legendWidth;
                 } else {
-                    centerX -= legendWidth / 2;
+                    leftOffset = -legendWidth;
                 }
-            } else {
-                centerX += options.series.funnel.offset.left;
-            }
+            } 
+            centerX += leftOffset/2;
+            
+            maxHeight = canvasHeight - Math.abs(topOffset),
+            maxWidth = canvasWidth - Math.abs(leftOffset),                
             
             // Start drawing funnel
-            var totalH = 0;
             ctx.save();
             for (var j = 0; j < slices.length; j++) {
                 drawSlice(slices,j,slices[j].color,true);
             }
             ctx.restore();
             
-            
-            totalH = 0;
             if (options.series.funnel.stroke.width > 0) {
+                totalH = initialY;
                 ctx.save();
                 ctx.lineWidth = options.series.funnel.stroke.width;
                 for (var j = 0; j < slices.length; j++) {
@@ -219,17 +221,15 @@ More detail and specific examples can be found in the included HTML file.
                 }
                 ctx.restore();
             }
-            console.log(slices);
+            console.debug(slices);
             
             function drawSlice(slices,j,color,fill){
-                var 
-                    maxHeight = 2*centerY, maxWidth = 2*centerX,
-                    tan = 2*(maxHeight - stemH) / (maxWidth-stemW),
-                    slice = slices[j],
-                    prevSlice = (j===0) ? null : slices[j-1];
+                var tan = 2*(maxHeight - stemH) / (maxWidth - stemW),
+                    prevSlice = (j===0) ? null : slices[j-1],
+                    slice = slices[j];
                     
+                slice.percent = 100 * slice.value / totalValue
                 slice.draw ={};
-                slice.percent = 100*slice.value / totalValue
                 slice.draw.height = maxHeight * slice.percent / 100;
                 slice.draw.highY = totalH;
                 slice.draw.lowY = slice.draw.highY + slice.draw.height;
@@ -245,7 +245,6 @@ More detail and specific examples can be found in the included HTML file.
                 } else {
                     ctx.strokeStyle = color;
                 }
-                
                 makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
                 
                 if (fill) {
@@ -279,7 +278,7 @@ More detail and specific examples can be found in the included HTML file.
                         text = plf(text, slice);
                     }
                     
-                    var y = slice.draw.highY+slice.draw.height/2;
+                    var y = slice.draw.highY + slice.draw.height/2;
                     var x;
                     switch(options.series.funnel.label.align) {
                         case "center":
@@ -335,19 +334,20 @@ More detail and specific examples can be found in the included HTML file.
         }
         
         function makeSlicePath(ctx, bottomWidth, topWidth, lowY, highY){
-            maxHeight = 2*centerY;
+            maxHeight = canvasHeight - Math.abs(topOffset);
             ctx.beginPath();
-            ctx.moveTo(centerX - topWidth / 2,highY);
-            ctx.lineTo(centerX + topWidth / 2,highY);
-            if(topWidth>stemW && bottomWidth==stemW){
-                ctx.lineTo(centerX + bottomWidth/2, maxHeight-stemH);
-                ctx.lineTo(centerX + bottomWidth / 2,lowY);
-                ctx.lineTo(centerX - bottomWidth / 2,lowY);
-                ctx.lineTo(centerX - bottomWidth/2, maxHeight-stemH);
+            ctx.moveTo(centerX-topWidth/2, highY);
+            ctx.lineTo(centerX+topWidth/2, highY);
+            if(topWidth > stemW && bottomWidth == stemW){
+                var stemTopY = (topOffset>0) ? maxHeight-stemH+topOffset : maxHeight-stemH;
+                ctx.lineTo(centerX+bottomWidth/2, stemTopY);
+                ctx.lineTo(centerX+bottomWidth/2, lowY);
+                ctx.lineTo(centerX-bottomWidth/2, lowY);
+                ctx.lineTo(centerX-bottomWidth/2, stemTopY);
             }
             else{
-                ctx.lineTo(centerX + bottomWidth / 2,lowY);
-                ctx.lineTo(centerX - bottomWidth / 2,lowY);
+                ctx.lineTo(centerX+bottomWidth/2, lowY);
+                ctx.lineTo(centerX-bottomWidth/2, lowY);
             }
             ctx.closePath();
         }
@@ -369,8 +369,8 @@ More detail and specific examples can be found in the included HTML file.
 
                     ctx.save();
                     makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
-                    x = mouseX - centerLeft;
-                    y = mouseY - centerTop;
+                    x = mouseX;
+                    y = mouseY;
 
                     if (ctx.isPointInPath) {
                         if (ctx.isPointInPath(x, y)) {
@@ -409,6 +409,7 @@ More detail and specific examples can be found in the included HTML file.
             var canvasX = parseInt(e.pageX - offset.left);
             var canvasY =  parseInt(e.pageY - offset.top);
             var item = findNearbySlice(canvasX, canvasY);
+            
 
             if (options.grid.autoHighlight) {
 
