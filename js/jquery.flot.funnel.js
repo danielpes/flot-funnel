@@ -322,7 +322,7 @@ More detail and specific examples can be found in the included HTML file.
                 
                 totalH += slice.height;
                 
-                if (options.series.funnel.label.show) {
+                if (options.series.funnel.label.show && slice.percent > options.series.funnel.label.threshold*100) {
                     return drawLabel();
                 } else return true;
                 
@@ -614,9 +614,10 @@ More detail and specific examples can be found in the included HTML file.
                     width: 1
                 },
                 label: {
-                    show: "auto",
+                    show: true,
+					align: "center",
                     formatter: function(label, slice) {
-                        return "<div style='font-size:x-small;text-align:center;padding:2px;color:white;'>" + label + "<br/>" + slice.data[0][1] +"</div>";
+                        return "<div style='font-size:x-small;text-align:center;padding:2px;color:white;'>" + slice.data[0][1] + "</div>";
                     },    // formatter function
                     background: {
                         color: null,

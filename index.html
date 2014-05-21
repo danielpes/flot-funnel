@@ -17,7 +17,7 @@
 		// Example Data
 
 		var data = [],
-			series = Math.floor(Math.random() * 6) + 3;
+			series = Math.floor(Math.random() * 3) + 3;
 
 		for (var i = 0; i < series; i++) {
 			data[i] = {
@@ -32,11 +32,9 @@
 		        funnel: {
 		            show: true,
 		            label: {
-		                align: "center",
-		                show: true,
-                        background: {
-                            opacity: 0.5
-                        }
+						show: true,
+						align: "center",
+						threshold: 0.03
                     }
 		        }
 		    },
@@ -66,9 +64,9 @@
 			alert(""  + obj.series.label + ": " + value);
 		});
 		
-    	/*function labelFormatter(label, series) {
-    		return "<div style='font-size:8pt; text-align:center; padding:2px; color:white;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
-    	}*/
+    	function labelFormatter(label, series) {
+    		return "<div style='font-size:8pt; text-align:center; padding:2px; color:white;'>"+series.data[0][1]+"</div>";
+    	}
     		
 	});
 
