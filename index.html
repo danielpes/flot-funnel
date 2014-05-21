@@ -16,30 +16,15 @@
 
 		// Example Data
 
-		var data = [
-			{ label: "Series1",  data: 20},
-			{ label: "Series2",  data: 20},
-			{ label: "Series3",  data: 20},
-			{ label: "Series4",  data: 20},
-		];
+		var data = [],
+			series = Math.floor(Math.random() * 6) + 3;
 
-		//var data = [
-		//	{ label: "Series1",  data: [[1,10]]},
-		//	{ label: "Series2",  data: [[1,30]]},
-		//	{ label: "Series3",  data: [[1,90]]},
-		//	{ label: "Series4",  data: [[1,70]]},
-		//	{ label: "Series5",  data: [[1,80]]},
-		//	{ label: "Series6",  data: [[1,0]]}
-		//];
-
-		//var data = [
-		//	{ label: "Series A",  data: 0.2063},
-		//	{ label: "Series B",  data: 38888}
-		//];
-
-		// Randomly Generated Data
-
-
+		for (var i = 0; i < series; i++) {
+			data[i] = {
+				label: "Series" + (i + 1),
+				data: Math.floor(Math.random() * 100) + 1
+			}
+		}
 		var placeholder = $("#placeholder");
 		
 		$.plot('#placeholder', data, {
@@ -67,7 +52,7 @@
 				return;
 			}
 
-			var value = parseFloat(obj.series.slice.data[0][1]).toFixed(2);
+			var value = parseFloat(obj.series.data[0][1]).toFixed(2);
 			$("#hover").html("<span style='font-weight:bold; color:" + obj.series.color + "'>" + obj.series.label + " (" + value + "%)</span>");
 		});
 
@@ -77,8 +62,8 @@
 				return;
 			}
 
-			var value = parseFloat(obj.series.slice.data[0][1]).toFixed(2);
-			alert(""  + obj.series.label + ": " + value + "%");
+			var value = parseFloat(obj.series.data[0][1]);
+			alert(""  + obj.series.label + ": " + value);
 		});
 		
     	/*function labelFormatter(label, series) {
