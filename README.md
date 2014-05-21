@@ -4,8 +4,6 @@ flot-funnel v0.1.0
 ###Description
 Flotcharts plugin for drawing funnel-like charts.
 
-The example is currently hosted at http://danielpes.kd.io/flot-funnel/ 
-
 ###Features / TODO list
 - [X] Basic features
 	- [X] Labelling
