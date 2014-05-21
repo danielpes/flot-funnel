@@ -1,4 +1,4 @@
-flot-funnel v0.1
+flot-funnel v0.1.0
 ===========
 
 ###Description
