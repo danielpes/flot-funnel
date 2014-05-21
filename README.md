@@ -3,17 +3,26 @@ flot-funnel v0.1.0
 
 ###Description
 Flotcharts plugin for drawing funnel-like charts.
+
+The example is currently hosted at http://danielpes.kd.io/flot-funnel/ 
+
 ###Features / TODO list
 - [X] Basic features
 	- [X] Labelling
 	- [X] Slice highlight on hover
 	- [X] Click event support
 - [X] "Height" slice mode
+- [X] Option to define stem height and width
 - [ ] "Area" slice mode
 - [ ] IE support
-- [ ] Option to define stem height and width
 
 ###Data Structure
+The plugin assumes that each series has a single data value, and that each
+value is a positive integer or zero.  Negative numbers don't make sense for a
+funnel chart, and have unpredictable results.  The values do NOT need to be
+passed in as percentages; the plugin will calculate the total percentages
+internally.
+
 The data structure accepted by the plugin is as follows:
 ```
 data = [
@@ -32,10 +41,15 @@ data = [
 
 ###Options Structure
 The plugin currently supoorts the following options:
+
 ```
 series: {
 	funnel: {
-		show: <boolean>|false, // determines if the chart is to be shown. 
+		show: <boolean>|false, // determines if the chart is to be shown.
+		stem: {
+			height: <float>|0.15, // 0-1 for for the height of the funnel stem (percentage of total height)
+			width: <float>|0.3 // 0-1 for the width of the funnel stem (percentage of max width)
+		},
 		offset: {
 			top: <integer>|0, // value to move the chart up or down,
 			left: <integer>|<string>|'auto' // value to move the chart left or right, or 'auto'

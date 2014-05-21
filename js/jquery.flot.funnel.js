@@ -32,36 +32,36 @@ The plugin supports these options:
 
     series: {
         funnel: {
-            show: true/false
-            
+        
             //begin TODO
             mode: "area" / "height"
-            stem: {
-                show: true/false
-                height: 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
-                width: 0-1 for the width of the funnel stem (percentage of the funnel's max width)
-            },
             //end TODO
             
+            show: <boolean>|false, // determines if the chart is to be shown. 
+            stem: {
+                height: <float>, // 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
+                width: <float> //0-1 for the width of the funnel stem (percentage of the funnel's max width)
+            },
             offset: {
-                top: integer value to move the chart up or down
-                left: integer value to move the chart left or right, or 'auto'
+                top: <integer>|0, // value to move the chart up or down,
+                left: <integer>|<string>|'auto' // value to move the chart left or right, or 'auto'
             },
             stroke: {
-                color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#FFF')
-                width: integer pixel width of the stroke
+                color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),
+                width: <integer>|1 // pixel width of the stroke
             },
             label: {
-                show: true/false, or 'auto'
-                formatter:  a user-defined function that modifies the text/style of the label text (html/css)
+                show: <boolean>|<string>|false, // boolean or "auto"
+                align: <string>|'center', // 'left', 'center', or 'align'
+                formatter: <function>, // user-defined function that modifies the text/style of the label text,
                 background: {
-                    color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#000')
-                    opacity: 0-1
+                    color: <string>|null, // hexidecimal color value (ie.: '#fff'),
+                    opacity: <float>|0 // 0-1 for the background opacity level
                 },
-                threshold: 0-1 for the percentage value at which to hide labels (if they're too small)
+                threshold: <float>|0 // 0-1 for the percentage value at which to hide labels (if they're too small)
             },
             highlight: {
-                opacity: 0-1
+                opacity: <float>|0.5 // 0-1 for the highlight opacity level
             }
         }
     }
@@ -157,7 +157,6 @@ More detail and specific examples can be found in the included HTML file.
             data = plot.getData();
             
             var total = 0,
-                //color = options.series.pie.combine.color,
                 newdata = [];
                 
 
@@ -226,7 +225,8 @@ More detail and specific examples can be found in the included HTML file.
             var    legendWidth = target.children().filter(".legend").children().width() || 0;
 
             ctx = newCtx;
-            stemW = ctx.canvas.width / 3;
+            stemH = canvasHeight * options.series.funnel.stem.height;
+            stemW = canvasWidth * options.series.funnel.stem.width;
 
             // WARNING: HACK! REWRITE THIS CODE AS SOON AS POSSIBLE!
 
@@ -291,7 +291,7 @@ More detail and specific examples can be found in the included HTML file.
                 //var dataHeight,lowWidth,highWidth,lowY;
                 var maxHeight = 2*centerY, maxWidth = 2*centerX;
                 var lowY, highY = totalH,
-                    tan = 2*(maxHeight - stemW/2) / (maxWidth-stemW),
+                    tan = 2*(maxHeight - stemH) / (maxWidth-stemW),
                     
                     slice = slices[j],
                     prevSlice = (j===0) ? null : slices[j-1];
@@ -407,10 +407,10 @@ More detail and specific examples can be found in the included HTML file.
             ctx.moveTo(centerX - topWidth / 2,highY);
             ctx.lineTo(centerX + topWidth / 2,highY);
             if(topWidth>stemW && bottomWidth==stemW){
-                ctx.lineTo(centerX + bottomWidth/2, maxHeight-stemW/2);
+                ctx.lineTo(centerX + bottomWidth/2, maxHeight-stemH);
                 ctx.lineTo(centerX + bottomWidth / 2,lowY);
                 ctx.lineTo(centerX - bottomWidth / 2,lowY);
-                ctx.lineTo(centerX - bottomWidth/2, maxHeight-stemW/2);
+                ctx.lineTo(centerX - bottomWidth/2, maxHeight-stemH);
             }
             else{
                 ctx.lineTo(centerX + bottomWidth / 2,lowY);
@@ -421,14 +421,6 @@ More detail and specific examples can be found in the included HTML file.
         
         
         //-- Additional Interactive related functions --
-
-        function isPointInPoly(poly, pt) {
-            for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
-                ((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) || (poly[j][1] <= pt[1] && pt[1]< poly[i][1]))
-                && (pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
-                && (c = !c);
-            return c;
-        }
 
         function findNearbySlice(mouseX, mouseY) {
 
@@ -457,37 +449,9 @@ More detail and specific examples can be found in the included HTML file.
                                 seriesIndex: i
                             };
                         }
-                    } /*else {
-						 
-						TODO: add IE support
-						
-                        // excanvas for IE doesn;t support isPointInPath, this is a workaround.
-
-                        var p1X = radius * Math.cos(s.startAngle),
-                            p1Y = radius * Math.sin(s.startAngle),
-                            p2X = radius * Math.cos(s.startAngle + s.angle / 4),
-                            p2Y = radius * Math.sin(s.startAngle + s.angle / 4),
-                            p3X = radius * Math.cos(s.startAngle + s.angle / 2),
-                            p3Y = radius * Math.sin(s.startAngle + s.angle / 2),
-                            p4X = radius * Math.cos(s.startAngle + s.angle / 1.5),
-                            p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5),
-                            p5X = radius * Math.cos(s.startAngle + s.angle),
-                            p5Y = radius * Math.sin(s.startAngle + s.angle),
-                            arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]],
-                            arrPoint = [x, y];
-
-                        // TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for funnel tilt?
-
-                        if (isPointInPoly(arrPoly, arrPoint)) {
-                            ctx.restore();
-                            return {
-                                datapoint: [s.percent, s.data],
-                                dataIndex: 0,
-                                series: s,
-                                seriesIndex: i
-                            };
-                        }
-                    }*/
+                    }
+                    
+                    // TODO: check IE compatibility
 
                     ctx.restore();
                 }
@@ -607,6 +571,10 @@ More detail and specific examples can be found in the included HTML file.
         series: {
             funnel: {
                 show: false,
+                stem:{
+                    height: 0.15,
+                    width: 0.3
+                },
                 offset: {
                     top: 0,
                     left: "auto"

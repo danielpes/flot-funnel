@@ -6,7 +6,6 @@
 	<title>Flot Examples: Funnel Charts</title>
 	<link href="css/examples.css" rel="stylesheet" type="text/css">
 	
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="js/jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="js/jquery.flot.funnel.js"></script>
@@ -31,12 +30,20 @@
 		    series: {
 		        funnel: {
 		            show: true,
+					stem: {
+						height: 0.2,
+						width: 0.4
+					},
 		            label: {
 						show: true,
 						align: "center",
-						threshold: 0.03
-                    }
-		        }
+						threshold: 0.04,
+						formatter: labelFormatter
+                    },
+					highlight: {
+						opacity: 0.2
+					}
+				}
 		    },
 			grid: {
 				hoverable: true,
@@ -44,16 +51,6 @@
 			}
 		});
 		
-		placeholder.bind("plothover", function(event, pos, obj) {
-
-			if (!obj) {
-				return;
-			}
-
-			var value = parseFloat(obj.series.data[0][1]).toFixed(2);
-			$("#hover").html("<span style='font-weight:bold; color:" + obj.series.color + "'>" + obj.series.label + " (" + value + "%)</span>");
-		});
-
 		placeholder.bind("plotclick", function(event, pos, obj) {
 
 			if (!obj) {
@@ -61,11 +58,11 @@
 			}
 
 			var value = parseFloat(obj.series.data[0][1]);
-			alert(""  + obj.series.label + ": " + value);
+			alert(obj.series.label + ": " + value);
 		});
 		
     	function labelFormatter(label, series) {
-    		return "<div style='font-size:8pt; text-align:center; padding:2px; color:white;'>"+series.data[0][1]+"</div>";
+    		return "<div style='font-size:11pt; text-align:center; padding:2px; color:#fff;'>"+series.data[0][1]+"</div>";
     	}
     		
 	});
@@ -76,7 +73,7 @@
 <body>
 
 	<div id="header">
-		<h2>Funnel Charts</h2>
+		<h2 style='text-align:center'>Funnel Charts</h2>
 	</div>
 
 	<div id="content">
