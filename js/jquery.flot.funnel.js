@@ -1,16 +1,17 @@
 /* 
 
 *********************************************************************
-* jquery.flot.funnel.js                                             *
-* Flot plugin for rendering Funnel-like charts.                     *
+* Funnel Chart Plugin for Flot                                      *
 *                                                                   *
 * Created by Daniel de Paula e Silva                                *
 * daniel.paula@icarotech.com                                        *
+* Licensed under the MIT license.                                   *
 *********************************************************************
 
 *********************************************************************
-*                           IMPORTANT                               *
-* Code based on the Pie Chart plugin for Flot.                      *
+*                         - IMPORTANT -                             *
+*                                                                   *
+* This code is based on the Pie Chart plugin for Flot.              *
 *                                                                   *
 * Pie plugin:                                                       *
 *   Source code: http://www.flotcharts.org/flot/jquery.flot.pie.js  *
@@ -33,14 +34,12 @@ The plugin supports these options:
     series: {
         funnel: {
         
-            //begin TODO
-            mode: "area" / "height"
-            //end TODO
+            mode: "area" / "height" // TODO
             
             show: <boolean>|false, // determines if the chart is to be shown. 
             stem: {
                 height: <float>, // 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
-                width: <float> //0-1 for the width of the funnel stem (percentage of the funnel's max width)
+                width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
             },
             offset: {
                 top: <integer>|0, // value to move the chart up or down,
@@ -72,7 +71,6 @@ More detail and specific examples can be found in the included HTML file.
 
 (function($) {
 
-
     function init(plot) {
 
         var canvas = null,
@@ -96,11 +94,7 @@ More detail and specific examples can be found in the included HTML file.
 
         plot.hooks.processOptions.push(function(plot, options) {
             if (options.series.funnel.show) {
-
                 options.grid.show = false;
-
-                // set labels.show
-
                 if (options.series.funnel.label.show == "auto") {
                     if (options.legend.show) {
                         options.series.funnel.label.show = false;
@@ -143,115 +137,56 @@ More detail and specific examples can be found in the included HTML file.
                 draw(plot, newCtx);
             }
         });
-
+        
+        
         function processDatapoints(plot, series, datapoints) {
-            if (processed) {
-                return;
-            }
-            
-            processed = true;
-            
             canvas = plot.getCanvas();
             target = $(canvas).parent();
             options = plot.getOptions();
-            data = plot.getData();
+            value = series.data;
             
-            var total = 0,
-                newdata = [];
-                
+            // If the data is an array, we'll assume that it's a standard
+            // Flot x-y pair, and are concerned only with the second value.
+            
+            if ($.isArray(value) && value.length == 1) {
+                value = value[0];
+            }
 
-            // Fix up the raw data from Flot, ensuring the data is numeric
-
-            for (var i = 0; i < data.length; ++i) {
-
-                var value = data[i].data;
-
-                // If the data is an array, we'll assume that it's a standard
-                // Flot x-y pair, and are concerned only with the second value.
-
-                // Note how we use the original array, rather than creating a
-                // new one; this is more efficient and preserves any extra data
-                // that the user may have stored in higher indexes.
-
-                if ($.isArray(value) && value.length == 1) {
-                    value = value[0];
-                }
-
-                if ($.isArray(value)) {
-                    // Equivalent to $.isNumeric() but compatible with jQuery < 1.7
-                    if (!isNaN(parseFloat(value[1])) && isFinite(value[1])) {
-                        value[1] = +value[1];
-                    } else {
-                        value[1] = 0;
-                    }
-                } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
-                    value = [1, +value];
+            if ($.isArray(value)) {
+                if (!isNaN(parseFloat(value[1])) && isFinite(value[1])) {
+                    value[1] = +value[1];
                 } else {
-                    value = [1, 0];
+                    value[1] = 0;
                 }
-
-                data[i].data = [value];
+            } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
+                value = [1, +value];
+            } else {
+                value = [1, 0];
             }
-
-            // Sum up all the slices, so we can calculate percentages for each
-
-            for (var i = 0; i < data.length; ++i) {
-                total += data[i].data[0][1];
-            }
-
-
-            for (var i = 0; i < data.length; ++i) {
-                var value = data[i].data[0][1];
-                newdata.push(
-                    $.extend(data[i], {     /* extend to allow keeping all other original data values
-                                               and using them e.g. in labelFormatter. */
-                        data: [[1, value]],
-                        color: data[i].color,
-                        label: data[i].label,
-                        percent: value / (total / 100)
-                    })
-                );
-            }
-
-            plot.setData(newdata);
+            series.data = [value];
+            series.value = value[1];
         }
-
+        
+        
         function draw(plot, newCtx) {
 
             if (!target) {
                 return; // if no series were passed
             }
 
-            var    legendWidth = target.children().filter(".legend").children().width() || 0;
-
+            var legendWidth = target.children().filter(".legend").children().width() || 0;
+            
+            var slices = plot.getData(),
+                totalValue = 0;
+            
+            for (var i = 0; i < slices.length; ++i) {
+                totalValue += slices[i].value;
+            }
+            
             ctx = newCtx;
             stemH = canvasHeight * options.series.funnel.stem.height;
             stemW = canvasWidth * options.series.funnel.stem.width;
 
-            // WARNING: HACK! REWRITE THIS CODE AS SOON AS POSSIBLE!
-
-            // When combining smaller slices into an 'other' slice, we need to
-            // add a new series.  Since Flot gives plugins no way to modify the
-            // list of series, the pie plugin uses a hack where the first call
-            // to processDatapoints results in a call to setData with the new
-            // list of series, then subsequent processDatapoints do nothing.
-
-            // The plugin-global 'processed' flag is used to control this hack;
-            // it starts out false, and is set to true after the first call to
-            // processDatapoints.
-
-            // Unfortunately this turns future setData calls into no-ops; they
-            // call processDatapoints, the flag is true, and nothing happens.
-
-            // To fix this we'll set the flag back to false here in draw, when
-            // all series have been processed, so the next sequence of calls to
-            // processDatapoints once again starts out with a slice-combine.
-            // This is really a hack; in 0.9 we need to give plugins a proper
-            // way to modify series before any processing begins.
-
-            processed = false;
-
-            // calculate maximum radius and center point
 
             centerY = canvasHeight / 2 + options.series.funnel.offset.top;
             centerX = canvasWidth / 2;
@@ -265,7 +200,6 @@ More detail and specific examples can be found in the included HTML file.
             } else {
                 centerX += options.series.funnel.offset.left;
             }
-            var slices = plot.getData();
             
             // Start drawing funnel
             var totalH = 0;
@@ -285,26 +219,26 @@ More detail and specific examples can be found in the included HTML file.
                 }
                 ctx.restore();
             }
-            
+            console.log(slices);
             
             function drawSlice(slices,j,color,fill){
-                //var dataHeight,lowWidth,highWidth,lowY;
-                var maxHeight = 2*centerY, maxWidth = 2*centerX;
-                var lowY, highY = totalH,
+                var 
+                    maxHeight = 2*centerY, maxWidth = 2*centerX,
                     tan = 2*(maxHeight - stemH) / (maxWidth-stemW),
-                    
                     slice = slices[j],
                     prevSlice = (j===0) ? null : slices[j-1];
                     
-                slice.height = maxHeight * slice.percent / 100;
-                slice.highY = highY;
-                slice.lowY = highY + slice.height;
-                slice.topWidth = (prevSlice!=null) ? prevSlice.bottomWidth : maxWidth;
+                slice.draw ={};
+                slice.percent = 100*slice.value / totalValue
+                slice.draw.height = maxHeight * slice.percent / 100;
+                slice.draw.highY = totalH;
+                slice.draw.lowY = slice.draw.highY + slice.draw.height;
+                slice.draw.topWidth = (prevSlice!=null) ? prevSlice.draw.bottomWidth : maxWidth;
                 
-                var bottomWidth = (j==slices.length-1) ? stemW : ( slice.topWidth - ( 2*slice.height / tan ) );
+                var bottomWidth = (j==slices.length-1) ? stemW : ( slice.draw.topWidth - ( 2*slice.draw.height / tan ) );
                 if (bottomWidth < stemW) bottomWidth = stemW;
                 
-                slice.bottomWidth = bottomWidth;
+                slice.draw.bottomWidth = bottomWidth;
                 
                 if (fill) {
                     ctx.fillStyle = color;
@@ -312,7 +246,7 @@ More detail and specific examples can be found in the included HTML file.
                     ctx.strokeStyle = color;
                 }
                 
-                makeSlicePath(ctx, slice.bottomWidth, slice.topWidth, slice.lowY, slice.highY);
+                makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
                 
                 if (fill) {
                     ctx.fill();
@@ -320,7 +254,7 @@ More detail and specific examples can be found in the included HTML file.
                     ctx.stroke();
                 }
                 
-                totalH += slice.height;
+                totalH += slice.draw.height;
                 
                 if (options.series.funnel.label.show && slice.percent > options.series.funnel.label.threshold*100) {
                     return drawLabel();
@@ -345,7 +279,7 @@ More detail and specific examples can be found in the included HTML file.
                         text = plf(text, slice);
                     }
                     
-                    var y = slice.highY+slice.height/2;
+                    var y = slice.draw.highY+slice.draw.height/2;
                     var x;
                     switch(options.series.funnel.label.align) {
                         case "center":
@@ -395,9 +329,8 @@ More detail and specific examples can be found in the included HTML file.
     
                     return true;
                 } // end individual label function
-        }
+            }
 
-            
             
         }
         
@@ -430,12 +363,12 @@ More detail and specific examples can be found in the included HTML file.
 
             for (var i = 0; i < slices.length; ++i) {
 
-                var s = slices[i];
+                var slice = slices[i];
 
-                if (s.funnel.show) {
+                if (slice.funnel.show) {
 
                     ctx.save();
-                    makeSlicePath(ctx, s.bottomWidth, s.topWidth, s.lowY, s.highY);
+                    makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
                     x = mouseX - centerLeft;
                     y = mouseY - centerTop;
 
@@ -443,9 +376,9 @@ More detail and specific examples can be found in the included HTML file.
                         if (ctx.isPointInPath(x, y)) {
                             ctx.restore();
                             return {
-                                datapoint: [s.percent, s.data],
+                                datapoint: [slice.percent, slice.data],
                                 dataIndex: 0,
-                                series: s,
+                                series: slice,
                                 seriesIndex: i
                             };
                         }
@@ -555,9 +488,9 @@ More detail and specific examples can be found in the included HTML file.
 
             octx.restore();
 
-            function drawHighlight(series) {
-
-                makeSlicePath(octx, series.bottomWidth, series.topWidth, series.lowY, series.highY);
+            function drawHighlight(slice) {
+            
+                makeSlicePath(octx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
                 //octx.fillStyle = parseColor(options.series.funnel.highlight.color).scale(null, null, null, options.series.funnel.highlight.opacity).toString();
                 octx.fillStyle = "rgba(255, 255, 255, " + options.series.funnel.highlight.opacity + ")"; // this is temporary until we have access to parseColor
                 octx.fill();

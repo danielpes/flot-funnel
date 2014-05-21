@@ -57,12 +57,11 @@
 				return;
 			}
 
-			var value = parseFloat(obj.series.data[0][1]);
-			alert(obj.series.label + ": " + value);
+			alert(obj.series.label + ": " + obj.series.value);
 		});
 		
     	function labelFormatter(label, series) {
-    		return "<div style='font-size:11pt; text-align:center; padding:2px; color:#fff;'>"+series.data[0][1]+"</div>";
+    		return "<div style='font-size:11pt; text-align:center; padding:2px; color:#fff;'>"+series.value+"</div>";
     	}
     		
 	});
