@@ -48,12 +48,12 @@ series: {
 			height: <float>|0.15, // 0-1 for for the height of the funnel stem (percentage of total height)
 			width: <float>|0.3 // 0-1 for the width of the funnel stem (percentage of max width)
 		},
-            	margin: {
-                	left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
-	                right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
-	                top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
-	                bottom: <float>|0 // 0-1 (%) for the bottom margin
-            	},
+		margin: {
+			left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
+			right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
+			top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
+			bottom: <float>|0 // 0-1 (%) for the bottom margin
+		},
 		stroke: {
 			color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),
 			width: <integer>|1 // pixel width of the stroke
