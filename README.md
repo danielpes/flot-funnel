@@ -23,7 +23,7 @@ internally.
 
 The data structure accepted by the plugin is as follows:
 ```
-data = [
+[
 	{
 		label: <string>,
 		data: <number> | [ [ 1, <number> ] ]
