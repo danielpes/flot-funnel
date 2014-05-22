@@ -41,9 +41,11 @@ The plugin supports these options:
                 height: <float>, // 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
                 width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
             },
-            offset: {
-                top: <integer>|0, // value to move the chart up or down,
-                left: <integer>|<string>|'auto' // value to move the chart left or right, or 'auto'
+            margin: {
+                left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
+                right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
+                top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
+                bottom: <float>|0 // 0-1 (%) for the bottom margin
             },
             stroke: {
                 color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),
@@ -79,6 +81,8 @@ More detail and specific examples can be found in the included HTML file.
             ctx = null,
             stemW = null;
             stemH = null;
+            centerX=null;
+            centerY=null;
             
         var canvasWidth = plot.getPlaceholder().width(),
             canvasHeight = plot.getPlaceholder().height();
@@ -171,39 +175,62 @@ More detail and specific examples can be found in the included HTML file.
                 return; // if no series were passed
             }
 
-            var legendWidth = target.children().filter(".legend").children().width() || 0
-                leftOffset = options.series.funnel.offset.left,
-                topOffset = options.series.funnel.offset.top,      
-                maxHeight = null, 
+            var legendWidth = target.children().filter(".legend").children().width() || 0,
+                leftMargin = options.series.funnel.margin.left,
+                rightMargin = options.series.funnel.margin.right,
+                topMargin = canvasHeight*options.series.funnel.margin.top,
+                bottomMargin = canvasHeight*options.series.funnel.margin.bottom,
+                maxHeight = null,
                 maxWidth = null,
-                slices = plot.getData(),
-                initialY = (topOffset>0) ? topOffset : 0;
+                initialY = (topMargin>0) ? topMargin : 0,
                 totalValue = 0,
                 totalH = initialY;
-                
+                slices = plot.getData(),
+                              
             stemH = canvasHeight * options.series.funnel.stem.height;
             stemW = canvasWidth * options.series.funnel.stem.width;
-
-            centerY = canvasHeight / 2 + topOffset;
-            centerX = canvasWidth / 2;
             
             ctx = newCtx;
+            
+            if (leftMargin == "auto") {
+                if (options.legend.position.match("w")) {
+                    leftMargin = legendWidth/canvasWidth;
+                }
+                else {
+                    leftMargin = 0;
+                }
+            }
+            if (rightMargin == "auto") {
+                if (!options.legend.position.match("w")) {
+                    rightMargin = legendWidth/canvasWidth;
+                }
+                else {
+                    rightMargin = 0;
+                }
+            }
+            
+            leftMargin *= canvasWidth;
+            rightMargin *= canvasWidth
+            
+            
+            centerX = (canvasWidth + leftMargin - rightMargin) / 2;
+            centerY = (canvasHeight + topMargin - bottomMargin) / 2;
+            
+            maxHeight = canvasHeight - (topMargin + bottomMargin);
+            maxWidth = canvasWidth - (leftMargin + rightMargin); 
+            
+            /* 
+            console.debug("margin: ", leftMargin, rightMargin, topMargin, bottomMargin);
+            console.debug("centerX: ", centerX);
+            console.debug("centerY: ", centerY);
+            console.debug("maxWidth: ", maxWidth);   
+            console.debug("maxHeight: ", maxHeight);  
+            console.debug("slices: ", slices);  
+            */        
             
             for (var i = 0; i < slices.length; ++i) {
                 totalValue += slices[i].value;
             }
-            
-            if (leftOffset == "auto") {
-                if (options.legend.position.match("w")) {
-                    leftOffset = +legendWidth;
-                } else {
-                    leftOffset = -legendWidth;
-                }
-            } 
-            centerX += leftOffset/2;
-            
-            maxHeight = canvasHeight - Math.abs(topOffset),
-            maxWidth = canvasWidth - Math.abs(leftOffset),                
             
             // Start drawing funnel
             ctx.save();
@@ -221,7 +248,6 @@ More detail and specific examples can be found in the included HTML file.
                 }
                 ctx.restore();
             }
-            console.debug(slices);
             
             function drawSlice(slices,j,color,fill){
                 var tan = 2*(maxHeight - stemH) / (maxWidth - stemW),
@@ -234,8 +260,10 @@ More detail and specific examples can be found in the included HTML file.
                 slice.draw.highY = totalH;
                 slice.draw.lowY = slice.draw.highY + slice.draw.height;
                 slice.draw.topWidth = (prevSlice!=null) ? prevSlice.draw.bottomWidth : maxWidth;
+                slice.draw.stemTopY = maxHeight - stemH + topMargin;
                 
                 var bottomWidth = (j==slices.length-1) ? stemW : ( slice.draw.topWidth - ( 2*slice.draw.height / tan ) );
+                
                 if (bottomWidth < stemW) bottomWidth = stemW;
                 
                 slice.draw.bottomWidth = bottomWidth;
@@ -245,7 +273,7 @@ More detail and specific examples can be found in the included HTML file.
                 } else {
                     ctx.strokeStyle = color;
                 }
-                makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
+                makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY, slice.draw.stemTopY);
                 
                 if (fill) {
                     ctx.fill();
@@ -333,13 +361,11 @@ More detail and specific examples can be found in the included HTML file.
             
         }
         
-        function makeSlicePath(ctx, bottomWidth, topWidth, lowY, highY){
-            maxHeight = canvasHeight - Math.abs(topOffset);
+        function makeSlicePath(ctx, bottomWidth, topWidth, lowY, highY, stemTopY){
             ctx.beginPath();
             ctx.moveTo(centerX-topWidth/2, highY);
             ctx.lineTo(centerX+topWidth/2, highY);
             if(topWidth > stemW && bottomWidth == stemW){
-                var stemTopY = (topOffset>0) ? maxHeight-stemH+topOffset : maxHeight-stemH;
                 ctx.lineTo(centerX+bottomWidth/2, stemTopY);
                 ctx.lineTo(centerX+bottomWidth/2, lowY);
                 ctx.lineTo(centerX-bottomWidth/2, lowY);
@@ -368,7 +394,7 @@ More detail and specific examples can be found in the included HTML file.
                 if (slice.funnel.show) {
 
                     ctx.save();
-                    makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
+                    makeSlicePath(ctx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY, slice.draw.stemTopY);
                     x = mouseX;
                     y = mouseY;
 
@@ -491,7 +517,7 @@ More detail and specific examples can be found in the included HTML file.
 
             function drawHighlight(slice) {
             
-                makeSlicePath(octx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY);
+                makeSlicePath(octx, slice.draw.bottomWidth, slice.draw.topWidth, slice.draw.lowY, slice.draw.highY, slice.draw.stemTopY);
                 //octx.fillStyle = parseColor(options.series.funnel.highlight.color).scale(null, null, null, options.series.funnel.highlight.opacity).toString();
                 octx.fillStyle = "rgba(255, 255, 255, " + options.series.funnel.highlight.opacity + ")"; // this is temporary until we have access to parseColor
                 octx.fill();
@@ -509,9 +535,11 @@ More detail and specific examples can be found in the included HTML file.
                     height: 0.15,
                     width: 0.3
                 },
-                offset: {
+                margin: {
+                    left: "auto",
+                    right: "auto",
                     top: 0,
-                    left: "auto"
+                    bottom: 0
                 },
                 stroke: {
                     color: "#fff",
