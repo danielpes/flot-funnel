@@ -23,7 +23,7 @@ internally.
 
 The data structure accepted by the plugin is as follows:
 ```
-data = [
+[
 	{
 		label: <string>,
 		data: <number> | [ [ 1, <number> ] ]
@@ -51,9 +51,15 @@ series: {
 			width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
 		},
 		margin: {
+<<<<<<< HEAD
 			left: <float>|0, // 0-1 (%) for the left margin
 			right: <float>|0, // 0-1 (%) for the right margin
 			top: <float>|0, // 0-1 (%) for the top margin
+=======
+			left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
+			right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
+			top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
+>>>>>>> c948e78fd672593984707ed6b17737c316cf5175
 			bottom: <float>|0 // 0-1 (%) for the bottom margin
 		},
 		stroke: {
