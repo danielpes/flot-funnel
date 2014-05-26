@@ -1,5 +1,5 @@
-flot-funnel v0.1.0
-===========
+flot-funnel v0.1
+============
 
 ###Description
 Flotcharts plugin for drawing funnel-like charts.
@@ -51,15 +51,9 @@ series: {
 			width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
 		},
 		margin: {
-<<<<<<< HEAD
 			left: <float>|0, // 0-1 (%) for the left margin
 			right: <float>|0, // 0-1 (%) for the right margin
 			top: <float>|0, // 0-1 (%) for the top margin
-=======
-			left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
-			right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
-			top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
->>>>>>> c948e78fd672593984707ed6b17737c316cf5175
 			bottom: <float>|0 // 0-1 (%) for the bottom margin
 		},
 		stroke: {
