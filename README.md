@@ -43,8 +43,6 @@ The plugin currently supoorts the following options:
 ```
 series: {
 	funnel: {
-		mode: "area" / "height" // TODO
-		
 		show: <boolean>|false, // determines if the chart is to be shown. 
 		stem: {
 			height: <float>, // 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
