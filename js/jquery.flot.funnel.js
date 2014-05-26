@@ -1,34 +1,35 @@
-/* 
 
-*********************************************************************
-* Funnel Chart Plugin for Flot                                      *
-*                                                                   *
-* Created by Daniel de Paula e Silva                                *
-* daniel.paula@icarotech.com                                        *
-* Licensed under the MIT license.                                   *
-*********************************************************************
+/*********************************************************************
+ * Funnel Chart Plugin for Flot                                      *
+ *                                                                   *
+ * Created by Daniel de Paula e Silva                                *
+ * daniel.paula@icarotech.com                                        *
+ * Licensed under the MIT license.                                   *
+ *********************************************************************/
 
-*********************************************************************
-*                         - IMPORTANT -                             *
-*                                                                   *
-* This code is based on the Pie Chart plugin for Flot.              *
-*                                                                   *
-* Pie plugin:                                                       *
-*   Source code: http://www.flotcharts.org/flot/jquery.flot.pie.js  *
-*   Created by Brian Medendorp                                      *
-*   Updated with contributions from btburnett3, Anthony Aragues     * 
-*       and Xavi Ivars                                              *
-*   Copyright (c) 2007-2014 IOLA and Ole Laursen.                   *
-*   Licensed under the MIT license.                                 *
-*********************************************************************
+/*********************************************************************
+ *                         - IMPORTANT -                             *
+ *                                                                   *
+ * This code is based on the Pie Chart plugin for Flot.              *
+ *                                                                   *
+ * Pie plugin:                                                       *
+ *   Source code: http://www.flotcharts.org/flot/jquery.flot.pie.js  *
+ *   Created by Brian Medendorp                                      *
+ *   Updated with contributions from btburnett3, Anthony Aragues     * 
+ *       and Xavi Ivars                                              *
+ *   Copyright (c) 2007-2014 IOLA and Ole Laursen.                   *
+ *   Licensed under the MIT license.                                 *
+ *********************************************************************/
 
+/*
 The plugin assumes that each series has a single data value, and that each
 value is a positive integer or zero.  Negative numbers don't make sense for a
 funnel chart, and have unpredictable results.  The values do NOT need to be
 passed in as percentages; the plugin will calculate the total percentages 
 internally.
+*/
 
-
+/*
 The plugin supports these options:
 
     series: {
@@ -42,9 +43,9 @@ The plugin supports these options:
                 width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
             },
             margin: {
-                left: <float>|<string>|'auto', // 0-1 (%) for the left margin or 'auto'
-                right: <float>|<string>|'auto', // 0-1 (%) for the right margin or 'auto'
-                top: <float>|0, // value to move the chart up or down, // 0-1 (%) for the top margin
+                left: <float>|0, // 0-1 (%) for the left margin
+                right: <float>|0, // 0-1 (%) for the right margin
+                top: <float>|0, // 0-1 (%) for the top margin
                 bottom: <float>|0 // 0-1 (%) for the bottom margin
             },
             stroke: {
@@ -68,21 +69,18 @@ The plugin supports these options:
     }
 
 More detail and specific examples can be found in the included HTML file.
-
 */
 
 (function($) {
-
+    "use strict";
     function init(plot) {
 
         var canvas = null,
             target = null,
             options = null,
             ctx = null,
-            stemW = null;
+            stemW = null,
             stemH = null;
-            centerX=null;
-            centerY=null;
             
         var canvasWidth = plot.getPlaceholder().width(),
             canvasHeight = plot.getPlaceholder().height();
@@ -139,12 +137,11 @@ More detail and specific examples can be found in the included HTML file.
             }
         });
         
-        
         function processDatapoints(plot, series, datapoints) {
+            var value = series.data;
             canvas = plot.getCanvas();
             target = $(canvas).parent();
             options = plot.getOptions();
-            value = series.data;
             
             // If the data is an array, we'll assume that it's a standard
             // Flot x-y pair, and are concerned only with the second value.
@@ -175,8 +172,7 @@ More detail and specific examples can be found in the included HTML file.
                 return; // if no series were passed
             }
 
-            var legendWidth = target.children().filter(".legend").children().width() || 0,
-                leftMargin = options.series.funnel.margin.left,
+            var leftMargin = options.series.funnel.margin.left,
                 rightMargin = options.series.funnel.margin.right,
                 topMargin = canvasHeight*options.series.funnel.margin.top,
                 bottomMargin = canvasHeight*options.series.funnel.margin.bottom,
@@ -184,49 +180,24 @@ More detail and specific examples can be found in the included HTML file.
                 maxWidth = null,
                 initialY = (topMargin>0) ? topMargin : 0,
                 totalValue = 0,
-                totalH = initialY;
-                slices = plot.getData(),
+                totalH = initialY,
+                slices = plot.getData();
                               
             stemH = canvasHeight * options.series.funnel.stem.height;
             stemW = canvasWidth * options.series.funnel.stem.width;
             
             ctx = newCtx;
             
-            if (leftMargin == "auto") {
-                if (options.legend.position.match("w")) {
-                    leftMargin = legendWidth/canvasWidth;
-                }
-                else {
-                    leftMargin = 0;
-                }
-            }
-            if (rightMargin == "auto") {
-                if (!options.legend.position.match("w")) {
-                    rightMargin = legendWidth/canvasWidth;
-                }
-                else {
-                    rightMargin = 0;
-                }
-            }
-            
             leftMargin *= canvasWidth;
-            rightMargin *= canvasWidth
-            
-            
-            centerX = (canvasWidth + leftMargin - rightMargin) / 2;
-            centerY = (canvasHeight + topMargin - bottomMargin) / 2;
+            rightMargin *= canvasWidth;
             
             maxHeight = canvasHeight - (topMargin + bottomMargin);
             maxWidth = canvasWidth - (leftMargin + rightMargin); 
             
-            /* 
-            console.debug("margin: ", leftMargin, rightMargin, topMargin, bottomMargin);
-            console.debug("centerX: ", centerX);
-            console.debug("centerY: ", centerY);
-            console.debug("maxWidth: ", maxWidth);   
-            console.debug("maxHeight: ", maxHeight);  
-            console.debug("slices: ", slices);  
-            */        
+            //console.debug("margin: ", leftMargin, rightMargin, topMargin, bottomMargin);
+            //console.debug("maxWidth: ", maxWidth);   
+            //console.debug("maxHeight: ", maxHeight);  
+            //console.debug("slices: ", slices);  
             
             for (var i = 0; i < slices.length; ++i) {
                 totalValue += slices[i].value;
@@ -254,12 +225,12 @@ More detail and specific examples can be found in the included HTML file.
                     prevSlice = (j===0) ? null : slices[j-1],
                     slice = slices[j];
                     
-                slice.percent = 100 * slice.value / totalValue
+                slice.percent = 100 * slice.value / totalValue;
                 slice.draw ={};
                 slice.draw.height = maxHeight * slice.percent / 100;
                 slice.draw.highY = totalH;
                 slice.draw.lowY = slice.draw.highY + slice.draw.height;
-                slice.draw.topWidth = (prevSlice!=null) ? prevSlice.draw.bottomWidth : maxWidth;
+                slice.draw.topWidth = (prevSlice!==null) ? prevSlice.draw.bottomWidth : maxWidth;
                 slice.draw.stemTopY = maxHeight - stemH + topMargin;
                 
                 var bottomWidth = (j==slices.length-1) ? stemW : ( slice.draw.topWidth - ( 2*slice.draw.height / tan ) );
@@ -290,7 +261,7 @@ More detail and specific examples can be found in the included HTML file.
                 
                 function drawLabel() {
 
-                    if (slice.data[0][1] == 0) {
+                    if (slice.data[0][1] === 0) {
                         return true;
                     }
                     // format label text
@@ -305,29 +276,34 @@ More detail and specific examples can be found in the included HTML file.
                     if (plf) {
                         text = plf(text, slice);
                     }
+
+                    var centerX = getCenterX(leftMargin, rightMargin);
+                    //console.debug("centerX: ", centerX);
                     
                     var y = slice.draw.highY + slice.draw.height/2;
                     var x;
-                    switch(options.series.funnel.label.align) {
-                        case "center":
-                            x = centerX;
-                            break;
-                        case "left":
-                            x = 0;
-                            break;
-                        case "right":
-                            x = 2*centerX;
-                            break;                                     
-                        default:
-                            x = centerX;
-                    }
+                    var labelTop, labelLeft=centerX;
     
                     var html = "<span class='funnelLabel' id='funnelLabel" + j + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
                     target.append(html);
     
                     var label = target.children("#funnelLabel" + j);
-                    var labelTop = (y - label.height() / 2);
-                    var labelLeft = (x - label.width() / 2);
+                    
+                    switch(options.series.funnel.label.align) {
+                        case "center":
+                            x = -label.width()/2;
+                            break;
+                        case "left":
+                            x = -(slice.draw.bottomWidth+slice.draw.topWidth)/4 + 0.5*label.width();
+                            break;
+                        case "right":
+                            x = +(slice.draw.bottomWidth+slice.draw.topWidth)/4 - 1.5*label.width();
+                            break;                                     
+                        default:
+                            x = centerX;
+                    }
+                    labelTop = (y - label.height() / 2);
+                    labelLeft += x;
                     
                     label.css("top", labelTop);
                     label.css("left", labelLeft);
@@ -338,13 +314,13 @@ More detail and specific examples can be found in the included HTML file.
                         return false;
                     }
     
-                    if (options.series.funnel.label.background.opacity != 0) {
+                    if (options.series.funnel.label.background.opacity !== 0) {
     
                         // put in the transparent background separately to avoid blended labels and label boxes
     
                         var c = options.series.funnel.label.background.color;
     
-                        if (c == null) {
+                        if (c === null) {
                             c = slice.color;
                         }
     
@@ -357,11 +333,14 @@ More detail and specific examples can be found in the included HTML file.
                     return true;
                 } // end individual label function
             }
-
-            
+        }
+        
+        function getCenterX(){
+            return canvasWidth*(1 + options.series.funnel.margin.left - options.series.funnel.margin.right) / 2;
         }
         
         function makeSlicePath(ctx, bottomWidth, topWidth, lowY, highY, stemTopY){
+            var centerX = getCenterX();
             ctx.beginPath();
             ctx.moveTo(centerX-topWidth/2, highY);
             ctx.lineTo(centerX+topWidth/2, highY);
@@ -384,7 +363,6 @@ More detail and specific examples can be found in the included HTML file.
         function findNearbySlice(mouseX, mouseY) {
 
             var slices = plot.getData(),
-                options = plot.getOptions(),
                 x, y;
 
             for (var i = 0; i < slices.length; ++i) {
@@ -477,7 +455,7 @@ More detail and specific examples can be found in the included HTML file.
         }
 
         function unhighlight(s) {
-            if (s == null) {
+            if (s === null) {
                 highlights = [];
                 plot.triggerRedrawOverlay();
             }
@@ -536,8 +514,8 @@ More detail and specific examples can be found in the included HTML file.
                     width: 0.3
                 },
                 margin: {
-                    left: "auto",
-                    right: "auto",
+                    left: 0,
+                    right: 0,
                     top: 0,
                     bottom: 0
                 },
@@ -547,7 +525,7 @@ More detail and specific examples can be found in the included HTML file.
                 },
                 label: {
                     show: false,
-					align: "center",
+                    align: "center",
                     formatter: function(label, slice) {
                         return "<div style='font-size:x-small;text-align:center;padding:2px;color:white;'>" + slice.data[0][1] + "</div>";
                     },    // formatter function

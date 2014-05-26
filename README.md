@@ -43,14 +43,18 @@ The plugin currently supoorts the following options:
 ```
 series: {
 	funnel: {
-		show: <boolean>|false, // determines if the chart is to be shown.
+		mode: "area" / "height" // TODO
+		
+		show: <boolean>|false, // determines if the chart is to be shown. 
 		stem: {
-			height: <float>|0.15, // 0-1 for for the height of the funnel stem (percentage of total height)
-			width: <float>|0.3 // 0-1 for the width of the funnel stem (percentage of max width)
+			height: <float>, // 0-1 for for the height of the funnel stem (percentage of the funnel's total height)
+			width: <float> // 0-1 for the width of the funnel stem (percentage of the funnel's max width)
 		},
-		offset: {
-			top: <integer>|0, // value to move the chart up or down,
-			left: <integer>|<string>|'auto' // value to move the chart left or right, or 'auto'
+		margin: {
+			left: <float>|0, // 0-1 (%) for the left margin
+			right: <float>|0, // 0-1 (%) for the right margin
+			top: <float>|0, // 0-1 (%) for the top margin
+			bottom: <float>|0 // 0-1 (%) for the bottom margin
 		},
 		stroke: {
 			color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),

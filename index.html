@@ -23,10 +23,9 @@
 			data[i] = {
 				label: "Series" + (i + 1),
 				data: x
-			}
+			};
 		}
-		var placeholder = $("#placeholder");
-		
+        var placeholder = $("#placeholder");
 		$.plot('#placeholder', data, {
 		    series: {
 		        funnel: {
@@ -34,6 +33,9 @@
 					stem: {
 						height: 0.2,
 						width: 0.4
+					},
+					margin: {
+                        //right: 0.15
 					},
 		            label: {
 						show: true,
@@ -52,6 +54,7 @@
 			}
 		});
 		
+        
 		placeholder.bind("plotclick", function(event, pos, obj) {
 
 			if (!obj) {
