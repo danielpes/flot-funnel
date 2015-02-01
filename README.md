@@ -74,3 +74,7 @@ series: {
 	}
 }
 ```
+### Examples
+The following screenshot shows some examples of funnels made with this plug-in:
+
+![Examples](/img/examples.png)
