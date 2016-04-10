@@ -17,7 +17,7 @@ Flotcharts plugin for drawing funnel-like charts.
 ###Data Structure
 The plugin assumes that each series has a single data value, and that each
 value is a positive integer or zero.  Negative numbers don't make sense for a
-funnel chart, and have unpredictable results.  The values do NOT need to be
+funnel chart, and have unpredictable results.  The values do **not** need to be
 passed in as percentages; the plugin will calculate the total percentages
 internally.
 
@@ -38,7 +38,7 @@ The data structure accepted by the plugin is as follows:
 ```
 
 ###Options Structure
-The plugin currently supoorts the following options:
+The plugin currently supports the following options:
 
 ```
 series: {
