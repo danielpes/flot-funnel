@@ -54,7 +54,7 @@ series: {
             bottom: <float>|0 // 0-1 (%) for the bottom margin
         },
         stroke: {
-        color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),
+            color: <string>|'fff', // hexidecimal color value (ie.: '#fff'),
             width: <integer>|1 // pixel width of the stroke
         },
         label: {
